@@ -4,7 +4,7 @@ Modo de uso
 
 ```javascript
 var gulp  = require('gulp');
-var stack = require('stack-front');
+var stack = require('gulpstack');
 
 stack(gulp);
 ```
@@ -33,51 +33,62 @@ gulp watch
 ###
 
 # Export source
-expr = (gulp,config) ->
+expr = (gulp,config = {}) ->
+
+  if not require then require = ->
+
   #
   # Dependencias
   #
-  coffee     = require? 'gulp-coffee'
-  concat     = require? 'gulp-concat'
-  concatCss  = require? 'gulp-concat-css'
-  connect    = require? 'gulp-connect'
-  cssmin     = require? 'gulp-cssmin'
-  fs         = require? 'fs'
-  gutil      = require? 'gulp-util'
-  include    = require? 'gulp-include'
-  jade       = require? 'gulp-jade'
-  markdown   = require? 'gulp-markdown'
-  minify     = require? 'gulp-minify'
-  minifyCSS  = require? 'gulp-minify-css'
-  rename     = require? 'gulp-rename'
-  sass       = require? 'gulp-sass'
-  sourcemaps = require? 'gulp-sourcemaps'
-  stylus     = require? 'gulp-stylus'
-  watch      = require? 'gulp-watch'
+  coffee     = require 'gulp-coffee'
+  concat     = require 'gulp-concat'
+  concatCss  = require 'gulp-concat-css'
+  connect    = require 'gulp-connect'
+  cssmin     = require 'gulp-cssmin'
+  fs         = require 'fs'
+  gutil      = require 'gulp-util'
+  include    = require 'gulp-include'
+  jade       = require 'gulp-jade'
+  markdown   = require 'gulp-markdown'
+  minify     = require 'gulp-minify'
+  minifyCSS  = require 'gulp-minify-css'
+  rename     = require 'gulp-rename'
+  sass       = require 'gulp-sass'
+  sourcemaps = require 'gulp-sourcemaps'
+  stylus     = require 'gulp-stylus'
+  watch      = require 'gulp-watch'
 
 
   #
   # Configuraciones
   #
-  folder_dest      = process.env.FOLDER_DEST || 'dest'
-  folder_src       = process.env.FOLDER_SRC || 'src'
-  script_to_concat = config?.scripts || []
-  styles_to_concat = config?.styles  || []
+  folder_dest           = config.dest || process.env.FOLDER_DEST || 'dest'
+  folder_src            = config.src || process.env.FOLDER_SRC || 'src'
+  script_to_concat      = config.scripts || []
+  styles_to_concat      = config.styles  || []
+  name_script_to_concat = config.nameContactScript || "script.js"
+  name_styles_to_concat = config.nameContactStyle || "style.css"
 
   # Rutas y destinos
-  __base = do process.cwd
+  __base = config.patch || do process.cwd
 
   dest = "#{__base}/#{folder_dest}"
   src  = "#{__base}/#{folder_src}"
 
   names =
-    coffee   : 'coffee'
+    coffee   : config.coffee || 'coffee'
+    css      : config.css || 'css'
+    html     : config.html || 'html'
+    jade     : config.jade || 'jade'
+    markdown : config.markdown || 'markdown'
+    sass     : config.sass || 'sass'
+    stylus   : config.stylus || 'stylus'
+
+  names_dest =
     css      : 'css'
-    html     : 'html'
-    jade     : 'jade'
-    markdown : 'markdown'
-    sass     : 'sass'
-    stylus   : 'stylus'
+    html     : ''
+    js       : 'js'
+    markdown : 'html'
 
   matchs =
     coffee   : "#{src}/#{names.coffee}/**/[a-zA-Z0-9]*.coffee"
@@ -92,14 +103,15 @@ expr = (gulp,config) ->
       sass     : "#{src}/#{names.sass}/**/*.{scss,sass}"
       stylus   : "#{src}/#{names.stylus}/**/*.styl"
 
+  # Rutas de destino
   dests =
-    css      : "#{dest}/css"
-    html     : "#{dest}/"
-    js       : "#{dest}/js"
-    markdown : "#{dest}/html"
+    css      : "#{dest}/#{names_dest.css}"
+    html     : "#{dest}/#{names_dest.html}"
+    js       : "#{dest}/#{names_dest.js}"
+    markdown : "#{dest}/#{names_dest.markdown}"
 
   #
-  # Tereas
+  # Tareas
   #
   gulp.task 'markdown', ->
     gulp.src matchs.markdown
@@ -146,7 +158,7 @@ expr = (gulp,config) ->
     'coffee'
     ], ->
     gulp.src script_to_concat
-      .pipe concat 'script.js'
+      .pipe concat name_script_to_concat
       .pipe do minify
       .pipe gulp.dest dests.js
       .pipe do connect.reload
@@ -156,7 +168,7 @@ expr = (gulp,config) ->
     'stylus'
     ], ->
     gulp.src styles_to_concat
-      .pipe concatCss 'style.css'
+      .pipe concatCss name_styles_to_concat
       .pipe do minify
       .pipe gulp.dest dests.css
       .pipe do connect.reload
