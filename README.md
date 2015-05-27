@@ -3,11 +3,11 @@ gulpstack
 
 Una colección con tareas predefinidas para [gulp](http://gulpjs.com/).
 
- - coffee
- - jade
- - markdown
- - sass
- - stylus
+ - [coffee](http://coffeescript.org/)
+ - [jade](http://jade-lang.com/)
+ - [markdown](http://en.wikipedia.org/wiki/Markdown)
+ - [sass](http://sass-lang.com/)
+ - [stylus](https://learnboost.github.io/stylus/)
 
 También permite concatenar los scripts y los styles.
 
