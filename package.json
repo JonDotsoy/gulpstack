@@ -30,5 +30,8 @@
     "email": "hi@jon.soy",
     "url": "jon.soy"
   },
+  "scripts": {
+    "build": "coffee --compile index.coffee"
+  },
   "license": "MIT"
 }

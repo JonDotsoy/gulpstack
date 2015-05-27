@@ -32,11 +32,6 @@ gulp watch
 ```
 ###
 
-# Historial de cambios
-#
-# - mié, 15 abr 2015. 23:30:
-#     Prepara las funciones para las tareas.
-
 # Export source
 expr = (gulp,config) ->
   #
