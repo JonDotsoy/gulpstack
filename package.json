@@ -32,7 +32,6 @@
   "scripts": {
     "build": "coffee --compile index.coffee"
   },
-
   "bugs": {
     "url": "https://github.com/jonDotsoy/gulpstack/issues"
   },
