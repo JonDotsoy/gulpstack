@@ -1,9 +1,8 @@
 {
   "name": "gulpstack",
-  "version": "1.0.1",
   "description": "_",
   "dependencies": {
-    "coffee": "^1.0.0",
+    "coffee": "^1.1.0",
     "gulp": "^3.8.11",
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.5.2",
@@ -24,7 +23,7 @@
     "gulp-util": "^3.0.4",
     "gulp-watch": "^4.2.4"
   },
-  "main": "index.coffee",
+  "main": "index.js",
   "author": {
     "name": "Jon Dotsoy",
     "email": "hi@jon.soy",
@@ -33,6 +32,7 @@
   "scripts": {
     "build": "coffee --compile index.coffee"
   },
+
   "bugs": {
     "url": "https://github.com/jonDotsoy/gulpstack/issues"
   },

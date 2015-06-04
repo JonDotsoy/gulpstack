@@ -35,7 +35,7 @@ gulp watch
 # Export source
 expr = (gulp,config = {}) ->
 
-  if not require then require = ->
+  # if not require then require = ->
 
   #
   # Dependencias
