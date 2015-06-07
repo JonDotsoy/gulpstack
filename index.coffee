@@ -192,7 +192,7 @@ expr = (gulp,config = {}) ->
 
   gulp.task 'connect', ->
     connect.server
-      root: ["#{dest}", 'bower_components']
+      root: ["#{dest}", "#{src}/public", 'bower_components']
       livereload: true
 
 
