@@ -4,6 +4,7 @@
   "description": "_",
   "dependencies": {
     "coffee": "^1.1.0",
+    "coffee-script": "^1.9.3",
     "gulp": "^3.8.11",
     "gulp-coffee": "^2.3.1",
     "gulp-concat": "^2.5.2",
@@ -31,7 +32,8 @@
     "url": "jon.soy"
   },
   "scripts": {
-    "build": "coffee --compile index.coffee"
+    "build": "coffee --compile index.coffee",
+    "install": "coffee --compile index.coffee"
   },
   "bugs": {
     "url": "https://github.com/jonDotsoy/gulpstack/issues"
