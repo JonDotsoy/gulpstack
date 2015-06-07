@@ -148,7 +148,7 @@ gulp watch
     gulp.task('debug', ['coffee', 'jade', 'markdown', 'sass', 'stylus', 'concat', 'concat-css']);
     gulp.task('connect', function() {
       return connect.server({
-        root: ["" + dest, 'bower_components'],
+        root: ["" + dest, src + "/public", 'bower_components'],
         livereload: true
       });
     });
