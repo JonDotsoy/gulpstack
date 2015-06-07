@@ -68,6 +68,7 @@ expr = (gulp,config = {}) ->
   styles_to_concat      = config.styles  || []
   name_script_to_concat = config.nameContactScript || "script.js"
   name_styles_to_concat = config.nameContactStyle || "style.css"
+  disable_tasks         = config.tasks || {}
 
   # Rutas y destinos
   __base = config.patch || do process.cwd
@@ -114,71 +115,79 @@ expr = (gulp,config = {}) ->
   # Tareas
   #
   gulp.task 'markdown', ->
-    gulp.src matchs.markdown
-      .pipe do markdown
-      .pipe gulp.dest dests.markdown
-      .pipe do connect.reload
+    if !(disable_tasks.markdown is false)
+      gulp.src matchs.markdown
+        .pipe do markdown
+        .pipe gulp.dest dests.markdown
+        .pipe do connect.reload
 
   gulp.task 'stylus', ->
-    gulp.src matchs.stylus
-      .pipe do stylus
-      .pipe gulp.dest dests.css
-      .pipe do cssmin
-      .pipe rename suffix: '.min'
-      .pipe gulp.dest dests.css
-      .pipe do connect.reload
+    if !(disable_tasks.stylus is false)
+      gulp.src matchs.stylus
+        .pipe do stylus
+        .pipe gulp.dest dests.css
+        .pipe do cssmin
+        .pipe rename suffix: '.min'
+        .pipe gulp.dest dests.css
+        .pipe do connect.reload
 
   gulp.task 'sass', ->
-    gulp.src matchs.sass
-      .pipe do sass
-      .pipe gulp.dest dests.css
-      .pipe do cssmin
-      .pipe rename suffix: '.min'
-      .pipe gulp.dest dests.css
-      .pipe do connect.reload
+    if !(disable_tasks.sass is false)
+      gulp.src matchs.sass
+        .pipe do sass
+        .pipe gulp.dest dests.css
+        .pipe do cssmin
+        .pipe rename suffix: '.min'
+        .pipe gulp.dest dests.css
+        .pipe do connect.reload
 
   gulp.task 'coffee', ->
-    gulp.src matchs.coffee
-      .pipe do include
-      .pipe do sourcemaps.init
-      .pipe do coffee
-      .pipe do minify
-      # .on 'error', gutil.log
-      .pipe sourcemaps.write '.'
-      .pipe gulp.dest dests.js
-      .pipe do connect.reload
+    # if !disable_tasks.coffee
+    if !(disable_tasks.coffee is false)
+      gulp.src matchs.coffee
+        .pipe do include
+        .pipe do sourcemaps.init
+        .pipe do coffee
+        .pipe do minify
+        # .on 'error', gutil.log
+        .pipe sourcemaps.write '.'
+        .pipe gulp.dest dests.js
+        .pipe do connect.reload
 
   gulp.task 'jade', ->
-    gulp.src matchs.jade
-      .pipe do jade
-      .pipe gulp.dest dests.html
-      .pipe do connect.reload
+    if !(disable_tasks.jade is false)
+      gulp.src matchs.jade
+        .pipe do jade
+        .pipe gulp.dest dests.html
+        .pipe do connect.reload
 
   gulp.task 'concat', [
     'coffee'
     ], ->
-    gulp.src script_to_concat
-      .pipe concat name_script_to_concat
-      .pipe do minify
-      .pipe gulp.dest dests.js
-      .pipe do connect.reload
+    if !(disable_tasks.concat is false)
+      gulp.src script_to_concat
+        .pipe concat name_script_to_concat
+        .pipe do minify
+        .pipe gulp.dest dests.js
+        .pipe do connect.reload
 
   gulp.task 'concat-css', [
     'sass'
     'stylus'
     ], ->
-    gulp.src styles_to_concat
-      .pipe concatCss name_styles_to_concat
-      .pipe do minify
-      .pipe gulp.dest dests.css
-      .pipe do connect.reload
+    if !(disable_tasks["concat-css"] is false)
+      gulp.src styles_to_concat
+        .pipe concatCss name_styles_to_concat
+        .pipe do minify
+        .pipe gulp.dest dests.css
+        .pipe do connect.reload
 
   gulp.task 'init', ->
-
-    try fs.mkdirSync "#{src}"
-    try fs.mkdirSync "#{dest}"
-    for index, name of names
-      try fs.mkdirSync "#{src}/#{name}"
+    if !(disable_tasks.init is false)
+      try fs.mkdirSync "#{src}"
+      try fs.mkdirSync "#{dest}"
+      for index, name of names
+        try fs.mkdirSync "#{src}/#{name}"
 
   gulp.task 'debug', [
     'coffee'
@@ -191,9 +200,10 @@ expr = (gulp,config = {}) ->
     ]
 
   gulp.task 'connect', ->
-    connect.server
-      root: ["#{dest}", "#{src}/public", 'bower_components']
-      livereload: true
+    if !(disable_tasks.connect is false)
+      connect.server
+        root: ["#{dest}", "#{src}/public", 'bower_components']
+        livereload: true
 
 
 
@@ -204,12 +214,13 @@ expr = (gulp,config = {}) ->
     # 'debug'
     'connect'
     ] , ->
-    gulp.watch matchs.watch.coffee,   ['coffee'] # old: concat
-    gulp.watch matchs.watch.jade,     ['jade']
-    gulp.watch matchs.watch.markdown, ['markdown', 'jade']
-    gulp.watch matchs.watch.sass,     ['sass'] # concat-css
-    gulp.watch matchs.watch.stylus,   ['stylus'] # concat-css
-    return
+    if !(disable_tasks.watch is false)
+      gulp.watch matchs.watch.coffee,   ['coffee'] # old: concat
+      gulp.watch matchs.watch.jade,     ['jade']
+      gulp.watch matchs.watch.markdown, ['markdown', 'jade']
+      gulp.watch matchs.watch.sass,     ['sass'] # concat-css
+      gulp.watch matchs.watch.stylus,   ['stylus'] # concat-css
+      return
 
 
 
