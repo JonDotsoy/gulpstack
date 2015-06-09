@@ -91,6 +91,7 @@ expr = (gulp,config = {}) ->
     css      : 'css'
     html     : ''
     js       : 'js'
+    coffee   : 'coffee'
     markdown : 'html'
 
 
@@ -103,11 +104,12 @@ expr = (gulp,config = {}) ->
 
 
   matchs =
-    coffee   : path.join centralDirectory.coffee, "**", "[a-zA-Z0-9]*.coffee"
-    jade     : path.join centralDirectory.jade, "**", "[a-zA-Z0-9]*.jade"
-    markdown : path.join centralDirectory.markdown, "**", "*.{markdown,md,mdown}"
-    sass     : path.join centralDirectory.sass, "**", "[a-zA-Z0-9]*.{scss,sass}"
-    stylus   : path.join centralDirectory.stylus, "**", "[a-zA-Z0-9]*.styl"
+    coffee    : path.join centralDirectory.coffee, "**", "[a-zA-Z0-9]*.coffee"
+    coffeesrc : path.join "#{dest}", "#{names_dest.coffee}", "**", "[a-zA-Z0-9]*.coffee"
+    jade      : path.join centralDirectory.jade, "**", "[a-zA-Z0-9]*.jade"
+    markdown  : path.join centralDirectory.markdown, "**", "*.{markdown,md,mdown}"
+    sass      : path.join centralDirectory.sass, "**", "[a-zA-Z0-9]*.{scss,sass}"
+    stylus    : path.join centralDirectory.stylus, "**", "[a-zA-Z0-9]*.styl"
 
     watch :
       coffee   : path.join "#{src}", "#{names.coffee}", "**", "*.coffee"
@@ -122,6 +124,7 @@ expr = (gulp,config = {}) ->
     css      : path.join "#{dest}", "#{names_dest.css}"
     html     : path.join "#{dest}", "#{names_dest.html}"
     js       : path.join "#{dest}", "#{names_dest.js}"
+    coffee   : path.join "#{dest}", "#{names_dest.coffee}"
     markdown : path.join "#{dest}", "#{names_dest.markdown}"
 
   #
@@ -134,6 +137,7 @@ expr = (gulp,config = {}) ->
         .pipe gulp.dest dests.markdown
         .pipe do connect.reload
 
+
   gulp.task 'stylus', ->
     if !(disable_tasks.stylus is false)
       gulp.src matchs.stylus
@@ -143,6 +147,7 @@ expr = (gulp,config = {}) ->
         .pipe rename suffix: '.min'
         .pipe gulp.dest dests.css
         .pipe do connect.reload
+
 
   gulp.task 'sass', ->
     if !(disable_tasks.sass is false)
@@ -154,18 +159,26 @@ expr = (gulp,config = {}) ->
         .pipe gulp.dest dests.css
         .pipe do connect.reload
 
-  gulp.task 'coffee', ->
-    # if !disable_tasks.coffee
-    if !(disable_tasks.coffee is false)
+
+  gulp.task 'coffee-include', ->
+    if !(disable_tasks['coffee-include'] is false)
       gulp.src matchs.coffee
         .pipe do include
+        .pipe gulp.dest dests.coffee
+
+
+  gulp.task 'coffee', [
+    'coffee-include'
+    ], ->
+    if !(disable_tasks.coffee is false)
+      gulp.src matchs.coffeesrc
         .pipe do sourcemaps.init
         .pipe do coffee
         .pipe do minify
-        # .on 'error', gutil.log
         .pipe sourcemaps.write '.'
         .pipe gulp.dest dests.js
         .pipe do connect.reload
+
 
   gulp.task 'jade', ->
     if !(disable_tasks.jade is false)
@@ -229,6 +242,7 @@ expr = (gulp,config = {}) ->
     'concat'
     'concat-css'
     ]
+
 
   gulp.task 'connect', ->
     if !(disable_tasks.connect is false)
