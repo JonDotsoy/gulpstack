@@ -57,6 +57,8 @@ expr = (gulp,config = {}) ->
   sourcemaps = require 'gulp-sourcemaps'
   stylus     = require 'gulp-stylus'
   watch      = require 'gulp-watch'
+  path       = require 'path'
+  mkdirp     = require 'mkdirp'
 
 
   #
@@ -73,8 +75,8 @@ expr = (gulp,config = {}) ->
   # Rutas y destinos
   __base = config.patch || do process.cwd
 
-  dest = "#{__base}/#{folder_dest}"
-  src  = "#{__base}/#{folder_src}"
+  dest = path.join "#{__base}", "#{folder_dest}"
+  src  = path.join "#{__base}", "#{folder_src}"
 
   names =
     coffee   : config.coffee || 'coffee'
@@ -91,25 +93,36 @@ expr = (gulp,config = {}) ->
     js       : 'js'
     markdown : 'html'
 
+
+  centralDirectory =
+    coffee   : path.join "#{src}", "#{names.coffee}"
+    jade     : path.join "#{src}", "#{names.jade}"
+    markdown : path.join "#{src}", "#{names.markdown}"
+    sass     : path.join "#{src}", "#{names.sass}"
+    stylus   : path.join "#{src}", "#{names.stylus}"
+
+
   matchs =
-    coffee   : "#{src}/#{names.coffee}/**/[a-zA-Z0-9]*.coffee"
-    jade     : "#{src}/#{names.jade}/**/[a-zA-Z0-9]*.jade"
-    markdown : "#{src}/#{names.markdown}/**/*.{markdown,md,mdown}"
-    sass     : "#{src}/#{names.sass}/**/[a-zA-Z0-9]*.{scss,sass}"
-    stylus   : "#{src}/#{names.stylus}/**/[a-zA-Z0-9]*.styl"
-    watch    :
-      coffee   : "#{src}/#{names.coffee}/**/*.coffee"
-      jade     : "#{src}/#{names.jade}/**/*.jade"
-      markdown : "#{src}/#{names.markdown}/**/*.{markdown,md,mdown}"
-      sass     : "#{src}/#{names.sass}/**/*.{scss,sass}"
-      stylus   : "#{src}/#{names.stylus}/**/*.styl"
+    coffee   : path.join centralDirectory.coffee, "**", "[a-zA-Z0-9]*.coffee"
+    jade     : path.join centralDirectory.jade, "**", "[a-zA-Z0-9]*.jade"
+    markdown : path.join centralDirectory.markdown, "**", "*.{markdown,md,mdown}"
+    sass     : path.join centralDirectory.sass, "**", "[a-zA-Z0-9]*.{scss,sass}"
+    stylus   : path.join centralDirectory.stylus, "**", "[a-zA-Z0-9]*.styl"
+
+    watch :
+      coffee   : path.join "#{src}", "#{names.coffee}", "**", "*.coffee"
+      jade     : path.join "#{src}", "#{names.jade}", "**", "*.jade"
+      markdown : path.join "#{src}", "#{names.markdown}", "**", "*.{markdown,md,mdown}"
+      sass     : path.join "#{src}", "#{names.sass}", "**", "*.{scss,sass}"
+      stylus   : path.join "#{src}", "#{names.stylus}", "**", "*.styl"
+
 
   # Rutas de destino
   dests =
-    css      : "#{dest}/#{names_dest.css}"
-    html     : "#{dest}/#{names_dest.html}"
-    js       : "#{dest}/#{names_dest.js}"
-    markdown : "#{dest}/#{names_dest.markdown}"
+    css      : path.join "#{dest}", "#{names_dest.css}"
+    html     : path.join "#{dest}", "#{names_dest.html}"
+    js       : path.join "#{dest}", "#{names_dest.js}"
+    markdown : path.join "#{dest}", "#{names_dest.markdown}"
 
   #
   # Tareas
@@ -182,12 +195,30 @@ expr = (gulp,config = {}) ->
         .pipe gulp.dest dests.css
         .pipe do connect.reload
 
+  ### Tasks Init ###
   gulp.task 'init', ->
     if !(disable_tasks.init is false)
-      try fs.mkdirSync "#{src}"
-      try fs.mkdirSync "#{dest}"
-      for index, name of names
-        try fs.mkdirSync "#{src}/#{name}"
+
+      try
+        console.log "Is create the directory ::", src
+        mkdirp.sync src
+
+      try
+        console.log "Is create the directory ::", dest
+        mkdirp.sync dest
+
+      for indexCentralDirectory, nameCentralDirectory of centralDirectory
+        try
+          console.log "Is create the directory ::", nameCentralDirectory
+          mkdirp.sync nameCentralDirectory
+
+      for indexDirectoryDests, nameDirectoryDests of dests
+        try
+          console.log "Is create the directory ::", nameDirectoryDests
+          mkdirp.sync nameDirectoryDests
+
+  ### End Tasks Init ###
+
 
   gulp.task 'debug', [
     'coffee'
@@ -202,7 +233,11 @@ expr = (gulp,config = {}) ->
   gulp.task 'connect', ->
     if !(disable_tasks.connect is false)
       connect.server
-        root: ["#{dest}", "#{src}/public", 'bower_components']
+        root: [
+          path.join "#{dest}"
+          path.join "#{src}", "public"
+          path.join "#{__base}" ,"bower_components"
+        ]
         livereload: true
 
 
