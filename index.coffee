@@ -272,7 +272,8 @@ expr = (gulp, config = {}) ->
         .on 'error', (err) ->
           console.log err.stack
           @emit 'end'
-        .pipe sourcemaps.write '.'
+        .pipe sourcemaps.write '.',
+          sourceRoot: '/coffee'
         .pipe gulp.dest dests.js
         .pipe do connect.reload
 
