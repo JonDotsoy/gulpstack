@@ -33,7 +33,7 @@ gulp watch
 ###
 
 # Export source
-expr = (gulp,config = {}) ->
+expr = (gulp, config = {}) ->
 
   # if not require then require = ->
 
@@ -52,86 +52,159 @@ expr = (gulp,config = {}) ->
   markdown   = require 'gulp-markdown'
   minify     = require 'gulp-minify'
   minifyCSS  = require 'gulp-minify-css'
+  mkdirp     = require 'mkdirp'
+  path       = require 'path'
   rename     = require 'gulp-rename'
   sass       = require 'gulp-sass'
   sourcemaps = require 'gulp-sourcemaps'
   stylus     = require 'gulp-stylus'
   watch      = require 'gulp-watch'
-  path       = require 'path'
-  mkdirp     = require 'mkdirp'
+
 
 
   #
   # Configuraciones
   #
-  folder_dest           = config.dest || process.env.FOLDER_DEST || 'dest'
-  folder_src            = config.src || process.env.FOLDER_SRC || 'src'
-  script_to_concat      = config.scripts || []
-  styles_to_concat      = config.styles  || []
+  disable_tasks         = config.tasks             || {}
+  externals             = config.externals         || {}
+  folder_dest           = config.dest              || process.env.FOLDER_DEST || 'dest'
+  folder_src            = config.src               || process.env.FOLDER_SRC  || 'src'
   name_script_to_concat = config.nameContactScript || "script.js"
-  name_styles_to_concat = config.nameContactStyle || "style.css"
-  disable_tasks         = config.tasks || {}
+  name_styles_to_concat = config.nameContactStyle  || "style.css"
+  script_to_concat      = config.scripts           || []
+  styles_to_concat      = config.styles            || []
 
-  # Rutas y destinos
+  #
+  # Rutas de destino y origen.
+  #
   __base = config.patch || do process.cwd
 
   dest = path.join "#{__base}", "#{folder_dest}"
   src  = path.join "#{__base}", "#{folder_src}"
 
+  #
+  # Nombre con los directorios que contengan el origen de los distintos tipos de
+  # archivos.
+  #
   names =
-    coffee   : config.coffee || 'coffee'
-    css      : config.css || 'css'
-    html     : config.html || 'html'
-    jade     : config.jade || 'jade'
+    coffee   : config.coffee   || 'coffee'
+    css      : config.css      || 'css'
+    font     : config.font     || 'font'
+    fonts    : config.fonts    || 'fonts'
+    html     : config.html     || 'html'
+    images   : config.images   || 'images'
+    jade     : config.jade     || 'jade'
+    js       : config.js       || 'js'
     markdown : config.markdown || 'markdown'
-    sass     : config.sass || 'sass'
-    stylus   : config.stylus || 'stylus'
+    sass     : config.sass     || 'sass'
+    styles   : config.styles   || 'styles'
+    stylus   : config.stylus   || 'stylus'
 
+  #
+  # Nombre de los directorios de destino.
+  #
   names_dest =
-    css      : 'css'
-    html     : ''
-    js       : 'js'
     coffee   : 'coffee'
+    css      : 'css'
+    font     : 'font'
+    html     : ''
+    images   : 'images'
+    js       : 'js'
     markdown : 'html'
 
 
+  #
+  # Ruta de los directorios de origen.
+  #
   centralDirectory =
     coffee   : path.join "#{src}", "#{names.coffee}"
+    css      : path.join "#{src}", "#{names.css}"
+    font     : path.join "#{src}", "#{names.font}"
+    images   : path.join "#{src}", "#{names.images}"
+    images   : path.join "#{src}", "#{names.images}"
     jade     : path.join "#{src}", "#{names.jade}"
+    js       : path.join "#{src}", "#{names.js}"
     markdown : path.join "#{src}", "#{names.markdown}"
     sass     : path.join "#{src}", "#{names.sass}"
     stylus   : path.join "#{src}", "#{names.stylus}"
 
 
-  matchs =
-    coffee    : path.join centralDirectory.coffee, "**", "[a-zA-Z0-9]*.coffee"
-    coffeesrc : path.join "#{dest}", "#{names_dest.coffee}", "**", "[a-zA-Z0-9]*.coffee"
-    jade      : path.join centralDirectory.jade, "**", "[a-zA-Z0-9]*.jade"
-    markdown  : path.join centralDirectory.markdown, "**", "*.{markdown,md,mdown}"
-    sass      : path.join centralDirectory.sass, "**", "[a-zA-Z0-9]*.{scss,sass}"
-    stylus    : path.join centralDirectory.stylus, "**", "[a-zA-Z0-9]*.styl"
 
+  #
+  # Rutas de búsqueda (Match) para encontrar los archivos que se usaran para
+  # compilar.
+  #
+  matchs =
+    coffee    : [path.join centralDirectory.coffee, "**", "[a-zA-Z0-9]*.coffee"]
+    coffeesrc : [path.join "#{dest}", "#{names_dest.coffee}", "**", "[a-zA-Z0-9]*.coffee"]
+    css       : [path.join centralDirectory.css, "**", "[a-zA-Z0-9]*.css"]
+    font      : [path.join centralDirectory.font, "**", "[a-zA-Z0-9]*.{ttf,woff,woff2,svg,eot}"]
+    images    : [path.join centralDirectory.images, "**", "[a-zA-Z0-9]*.{jpg,jpeg,png,gif,svg}"]
+    jade      : [path.join centralDirectory.jade, "**", "[a-zA-Z0-9]*.jade"]
+    js        : [path.join centralDirectory.js, "**", "[a-zA-Z0-9]*.js"]
+    markdown  : [path.join centralDirectory.markdown, "**", "*.{markdown,md,mdown}"]
+    sass      : [path.join centralDirectory.sass, "**", "[a-zA-Z0-9]*.{scss,sass}"]
+    stylus    : [path.join centralDirectory.stylus, "**", "[a-zA-Z0-9]*.styl"]
+
+    # Actúan como visor
     watch :
       coffee   : path.join "#{src}", "#{names.coffee}", "**", "*.coffee"
+      css      : path.join "#{src}", "#{names.css}", "**", "*.css"
+      images   : path.join "#{src}", "#{names.images}", "**", "*.{jpg,jpeg,png,gif,svg}"
       jade     : path.join "#{src}", "#{names.jade}", "**", "*.jade"
+      js       : path.join "#{src}", "#{names.js}", "**", "*.js"
       markdown : path.join "#{src}", "#{names.markdown}", "**", "*.{markdown,md,mdown}"
       sass     : path.join "#{src}", "#{names.sass}", "**", "*.{scss,sass}"
       stylus   : path.join "#{src}", "#{names.stylus}", "**", "*.styl"
 
 
+  if externals.css
+    for indexNamecss, namecss of externals.css
+      matchs.css.push namecss
+
+  if externals.font
+    for indexNamefont, namefont of externals.font
+      matchs.font.push namefont
+
+  if externals.js
+    for indexNamejs, namejs of externals.js
+      matchs.js.push namejs
+
+  if externals.coffee
+    for indexNamecoffee, namecoffee of externals.coffee
+      matchs.coffee.push namecoffee
+
+  if externals.images
+    for indexNameimages, nameimages of externals.images
+      matchs.images.push nameimages
+
+  if externals.sass
+    for indexNamesass, namesass of externals.sass
+      matchs.sass.push namesass
+
+  if externals.stylus
+    for indexNamestylus, namestylus of externals.stylus
+      matchs.stylus.push namestylus
+
+
+
+  #
   # Rutas de destino
+  #
   dests =
-    css      : path.join "#{dest}", "#{names_dest.css}"
-    html     : path.join "#{dest}", "#{names_dest.html}"
-    js       : path.join "#{dest}", "#{names_dest.js}"
     coffee   : path.join "#{dest}", "#{names_dest.coffee}"
+    css      : path.join "#{dest}", "#{names_dest.css}"
+    font     : path.join "#{dest}", "#{names_dest.font}"
+    html     : path.join "#{dest}", "#{names_dest.html}"
+    images   : path.join "#{dest}", "#{names_dest.images}"
+    js       : path.join "#{dest}", "#{names_dest.js}"
     markdown : path.join "#{dest}", "#{names_dest.markdown}"
 
   #
-  # Tareas
+  # Tareas Programadas
   #
   gulp.task 'markdown', ->
-    if !(disable_tasks.markdown is false)
+    if not (disable_tasks["markdown"] is false)
       gulp.src matchs.markdown
         .pipe do markdown
         .pipe gulp.dest dests.markdown
@@ -139,7 +212,7 @@ expr = (gulp,config = {}) ->
 
 
   gulp.task 'stylus', ->
-    if !(disable_tasks.stylus is false)
+    if not (disable_tasks["stylus"] is false)
       gulp.src matchs.stylus
         .pipe do stylus
         .pipe gulp.dest dests.css
@@ -150,7 +223,7 @@ expr = (gulp,config = {}) ->
 
 
   gulp.task 'sass', ->
-    if !(disable_tasks.sass is false)
+    if not (disable_tasks["sass"] is false)
       gulp.src matchs.sass
         .pipe do sass
         .pipe gulp.dest dests.css
@@ -161,7 +234,7 @@ expr = (gulp,config = {}) ->
 
 
   gulp.task 'coffee-include', ->
-    if !(disable_tasks['coffee-include'] is false)
+    if not (disable_tasks['coffee-include'] is false)
       gulp.src matchs.coffee
         .pipe do include
         .pipe gulp.dest dests.coffee
@@ -170,7 +243,7 @@ expr = (gulp,config = {}) ->
   gulp.task 'coffee', [
     'coffee-include'
     ], ->
-    if !(disable_tasks.coffee is false)
+    if not (disable_tasks["coffee"] is false)
       gulp.src matchs.coffeesrc
         .pipe do sourcemaps.init
         .pipe do coffee
@@ -181,7 +254,7 @@ expr = (gulp,config = {}) ->
 
 
   gulp.task 'jade', ->
-    if !(disable_tasks.jade is false)
+    if not (disable_tasks["jade"] is false)
       gulp.src matchs.jade
         .pipe do jade
         .pipe gulp.dest dests.html
@@ -190,7 +263,7 @@ expr = (gulp,config = {}) ->
   gulp.task 'concat', [
     'coffee'
     ], ->
-    if !(disable_tasks.concat is false)
+    if not (disable_tasks["concat"] is false)
       gulp.src script_to_concat
         .pipe concat name_script_to_concat
         .pipe do minify
@@ -201,7 +274,7 @@ expr = (gulp,config = {}) ->
     'sass'
     'stylus'
     ], ->
-    if !(disable_tasks["concat-css"] is false)
+    if not (disable_tasks["concat-css"] is false)
       gulp.src styles_to_concat
         .pipe concatCss name_styles_to_concat
         .pipe do minify
@@ -210,25 +283,52 @@ expr = (gulp,config = {}) ->
 
   ### Tasks Init ###
   gulp.task 'init', ->
-    if !(disable_tasks.init is false)
+    if not (disable_tasks["init"] is false)
 
       try
-        console.log "Is create the directory ::", src
-        mkdirp.sync src
+        if not fs.existsSync src
+          console.log "Created the directory \"#{src}\"."
+          mkdirp.sync src
 
       try
-        console.log "Is create the directory ::", dest
-        mkdirp.sync dest
+        if not fs.existsSync dest
+          console.log "Created the directory \"#{dest}\"."
+          mkdirp.sync dest
 
       for indexCentralDirectory, nameCentralDirectory of centralDirectory
         try
-          console.log "Is create the directory ::", nameCentralDirectory
-          mkdirp.sync nameCentralDirectory
+          if not fs.existsSync nameCentralDirectory
+            console.log "Created the directory \"#{nameCentralDirectory}\"."
+            mkdirp.sync nameCentralDirectory
 
       for indexDirectoryDests, nameDirectoryDests of dests
         try
-          console.log "Is create the directory ::", nameDirectoryDests
-          mkdirp.sync nameDirectoryDests
+          if not fs.existsSync nameDirectoryDests
+            console.log "Created the directory \"#{nameDirectoryDests}\"."
+            mkdirp.sync nameDirectoryDests
+
+  gulp.task 'copy-css', ->
+    if not (disable_tasks["copy-css"] is false)
+      gulp.src matchs.css
+        .pipe gulp.dest dests.css
+
+  gulp.task 'copy-js', ->
+    if not (disable_tasks["copy-js"] is false)
+      gulp.src matchs.js
+        .pipe gulp.dest dests.js
+
+
+  gulp.task 'copy-images', ->
+    if not (disable_tasks["copy-images"] is false)
+      gulp.src matchs.images
+        .pipe gulp.dest dests.images
+
+
+  gulp.task 'copy-font', ->
+    if not (disable_tasks["copy-font"] is false)
+      gulp.src matchs.font
+        .pipe gulp.dest dests.font
+
 
   ### End Tasks Init ###
 
@@ -241,11 +341,15 @@ expr = (gulp,config = {}) ->
     'stylus'
     'concat'
     'concat-css'
+    'copy-css'
+    'copy-js'
+    'copy-images'
+    'copy-font'
     ]
 
 
   gulp.task 'connect', ->
-    if !(disable_tasks.connect is false)
+    if not (disable_tasks["connect"] is false)
       connect.server
         root: [
           path.join "#{dest}"
@@ -263,12 +367,20 @@ expr = (gulp,config = {}) ->
     # 'debug'
     'connect'
     ] , ->
-    if !(disable_tasks.watch is false)
+    if not (disable_tasks["watch"] is false)
+
       gulp.watch matchs.watch.coffee,   ['coffee'] # old: concat
       gulp.watch matchs.watch.jade,     ['jade']
       gulp.watch matchs.watch.markdown, ['markdown', 'jade']
       gulp.watch matchs.watch.sass,     ['sass'] # concat-css
       gulp.watch matchs.watch.stylus,   ['stylus'] # concat-css
+      gulp.watch script_to_concat,      ['concat']
+      gulp.watch styles_to_concat,      ['concat-css']
+
+      gulp.watch matchs.watch.css,      ['copy-css'] # concat-css
+      gulp.watch matchs.watch.js,       ['copy-js'] # concat-css
+      gulp.watch matchs.watch.images,   ['copy-images'] # concat-css
+
       return
 
 
