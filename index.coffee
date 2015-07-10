@@ -207,6 +207,9 @@ expr = (gulp, config = {}) ->
     if not (disable_tasks["markdown"] is false)
       gulp.src matchs.markdown
         .pipe do markdown
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe gulp.dest dests.markdown
         .pipe do connect.reload
 
@@ -215,8 +218,14 @@ expr = (gulp, config = {}) ->
     if not (disable_tasks["stylus"] is false)
       gulp.src matchs.stylus
         .pipe do stylus
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe gulp.dest dests.css
         .pipe do cssmin
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe rename suffix: '.min'
         .pipe gulp.dest dests.css
         .pipe do connect.reload
@@ -226,8 +235,14 @@ expr = (gulp, config = {}) ->
     if not (disable_tasks["sass"] is false)
       gulp.src matchs.sass
         .pipe do sass
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe gulp.dest dests.css
         .pipe do cssmin
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe rename suffix: '.min'
         .pipe gulp.dest dests.css
         .pipe do connect.reload
@@ -237,6 +252,9 @@ expr = (gulp, config = {}) ->
     if not (disable_tasks['coffee-include'] is false)
       gulp.src matchs.coffee
         .pipe do include
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe gulp.dest dests.coffee
 
 
@@ -247,8 +265,15 @@ expr = (gulp, config = {}) ->
       gulp.src matchs.coffeesrc
         .pipe do sourcemaps.init
         .pipe do coffee
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe do minify
-        .pipe sourcemaps.write '.'
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
+        .pipe sourcemaps.write '.',
+          sourceRoot: '/coffee'
         .pipe gulp.dest dests.js
         .pipe do connect.reload
 
@@ -257,6 +282,9 @@ expr = (gulp, config = {}) ->
     if not (disable_tasks["jade"] is false)
       gulp.src matchs.jade
         .pipe do jade
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe gulp.dest dests.html
         .pipe do connect.reload
 
@@ -267,6 +295,9 @@ expr = (gulp, config = {}) ->
       gulp.src script_to_concat
         .pipe concat name_script_to_concat
         .pipe do minify
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe gulp.dest dests.js
         .pipe do connect.reload
 
@@ -278,6 +309,9 @@ expr = (gulp, config = {}) ->
       gulp.src styles_to_concat
         .pipe concatCss name_styles_to_concat
         .pipe do minify
+        .on 'error', (err) ->
+          console.log err.stack
+          @emit 'end'
         .pipe gulp.dest dests.css
         .pipe do connect.reload
 
